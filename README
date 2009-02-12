@@ -1,22 +1,46 @@
-puppet module daemontools
-#########################
+Puppet module to manage daemontools config
+==========================================
 
-written by immerda project group
-admin+puppet(at)immerda.ch
-GPLv3
+Dan Bernstein's daemontools package (http://cr.yp.to/daemontools.html) is a
+neat, easy way to daemonise pretty much any program you might have laying
+around, make sure it keeps running, log it's output, and so on.
 
-#################################
+This module was originally written by the "immerda project group
+<admin+puppet(at)immerda.ch>", and has been significantly modified by Matt
+Palmer <mpalmer@engineyard.com>.  It is provided under the terms of the GNU
+Public Licence, version 3.
 
 
-you can use this module to manage daemontools and add or
-remove daemons from the service directory:
+Usage
+-----
 
-start a service:
+In every node you wish to run daemontools on, just:
 
-daemontools::service{"tinydns": }
-or
-daemontools::service{"tinydns": ensure => 'running' }
+    include daemontools
 
-stop it:
+This will install a 'daemontools' package (make sure one is available in
+your OS' default package repo), and (if possible) make sure it starts on
+boot.
 
-daemontools::service{"tinydns": ensure => 'stopped' }
+From there, you can define services to run with the daemontools::service
+type.  The name of the resource is the directory in /service that will be
+used, and the type takes the following parameters:
+
+* ensure (optional; default 'running'): What state you want the service to
+  be in.  Valid values are:
+  - running: Configured and doing it's thing.
+  - present: Configured, but not running.
+  - absent: Removed completely.  /service/$name will not exist.
+
+* program (mandatory unless ensure => absent): The binary that you want to
+  run for the service.  This will be written into the run script.
+
+* user (optional; default 'root'): The user to run the program as.  This
+  will be passed to envuidgid.
+
+* logaction (optional; default empty): If specified, the appropriate
+  configuration will be created to run a multilog instance (as the same user
+  as the main program) using the 'log' directory as described in the
+  'svscan' documentation.  The value of this parameter will be passed as the
+  arguments to multilog.  Quoting for this parameter can get exciting, and
+  you'll need to make the directory for the logs yourself.

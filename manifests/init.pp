@@ -4,9 +4,7 @@
 # For rpms for redhat, centos etc. you might want to look here:
 # http://summersoft.fay.ar.us/pub/qmail/daemontools/
 
-# modules_dir { "daemontools": }
-
-import "defines.pp"
+import "service.pp"
 
 class daemontools {
     case $operatingsystem {

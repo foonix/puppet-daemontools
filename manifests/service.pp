@@ -2,6 +2,7 @@ define daemontools::service(
     $ensure = 'running',
     $program,
     $user = 'root',
+    $location = '/service',
     $logaction = false
 ){
 	case $ensure {
@@ -9,10 +10,11 @@ define daemontools::service(
 			daemontools::service::running { $name:
 				program => $program,
 				user => $user,
+				location => $location,
 				logaction => $logaction
 			}
 			
-			file { "/service/${name}/down":
+			file { "${location}/${name}/down":
 				ensure => absent
 			}
 		}
@@ -20,15 +22,16 @@ define daemontools::service(
 			daemontools::service::running { $name:
 				program => $program,
 				user => $user,
+				location => $location,
 				logaction => $logaction
 			}
 			
-			file { "/service/${name}/down":
+			file { "${location}/${name}/down":
 				ensure => present
 			}
 		}
 		'absent': {
-			file { "/service/${name}":
+			file { "${location}/${name}":
 				ensure => absent
 			}
 		}
@@ -36,22 +39,22 @@ define daemontools::service(
 	}
 }
 
-define daemontools::service::running($program, $user, $logaction = false)
+define daemontools::service::running($program, $user, $logaction = false, $location = '/service')
 {
-	file { "/service/$name":
+	file { "$location/$name":
 		ensure => directory,
 		owner => root,
 		group => root,
 		require => Package[daemontools]
 	}
 	
-	file { "/service/$name/supervise":
+	file { "$location/$name/supervise":
 		ensure => directory,
 		owner => root,
 		group => root
 	}
 	
-	file { "/service/$name/run":
+	file { "$location/$name/run":
 		content => template("daemontools/main_run.erb"),
 		mode => 0755,
 		owner => root,
@@ -60,9 +63,10 @@ define daemontools::service::running($program, $user, $logaction = false)
 	
 	if $logaction {
 		daemontools::service::running { "${name}/log":
-			program => "/usr/bin/multilog ${logaction}",
+			program => "multilog ${logaction}",
 			user => $user,
-			require => File["/service/$name"]
+			location => $location,
+			require => File["$location/$name"]
 		}
 	}
 }

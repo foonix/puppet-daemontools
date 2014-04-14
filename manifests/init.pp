@@ -29,6 +29,7 @@ class daemontools::centos inherits daemontools::base {
     # but not started
     exec{'svscanboot &':
         unless => 'ps ax | grep -v grep | grep -q svscan',
+        path => '/usr/local/bin:/usr/bin'
     }
 }
 
